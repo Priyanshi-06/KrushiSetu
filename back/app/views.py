@@ -36,7 +36,7 @@ class SubsidyViewSet(viewsets.ModelViewSet):
     """
     Main ViewSet for Subsidy management.
     """
-   queryset = Subsidy.objects.select_related('created_by').annotate(
+    queryset = Subsidy.objects.select_related('created_by').annotate(
         ratings_count=Count('ratings')
     ).order_by('-created_at')
     

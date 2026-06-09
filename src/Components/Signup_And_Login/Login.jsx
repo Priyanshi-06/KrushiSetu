@@ -5,6 +5,7 @@ import PasswordToggleIcon from './PasswordToggleIcon';
 import api from './api';
 import { Toaster, toast } from 'react-hot-toast';
 import { clearAuth, normalizeRole, storeTokens, getRedirectPathForRole} from '../../utils/auth';
+import { getApiErrorMessage } from '../../utils/apiError';
 import { useNavigate } from 'react-router-dom';
 
 function Login({ onForgotPasswordClick, redirectTo }) {
@@ -153,7 +154,7 @@ function Login({ onForgotPasswordClick, redirectTo }) {
 
         } catch (error) {
             console.error("Login failed: ", error.response ? error.response.data : error.message);
-            toast.error(error.response?.data?.error || "Login failed");
+            toast.error(getApiErrorMessage(error, "Login failed"));
             setIsLoading(false);
         }
     };

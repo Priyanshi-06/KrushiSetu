@@ -13,8 +13,18 @@ from django.core.mail import send_mail
 
 from .otp_utils import send_otp, verify_otp
 from .serializers import UserSignupSerializer
-
 User = get_user_model()
+
+
+def _auth_cookie_options():
+    """Use secure cross-site cookies in production; lax cookies on local HTTP."""
+    if settings.DEBUG:
+        return {"secure": False, "samesite": "Lax"}
+    return {"secure": True, "samesite": "None"}
+
+
+def _signup_response(user, message, status_code):
+    return Response({"message": message, "user_id": user.id}, status=status_code)
 
 
 # --------------------------------------------------------------------
@@ -155,12 +165,19 @@ class UserSignupView(generics.CreateAPIView):
             existing_user.set_password(password)
             existing_user.save()
 
-            send_otp(existing_user, "email_verify")
+            try:
+                send_otp(existing_user, "email_verify")
+            except Exception as exc:
+                return Response(
+                    {"error": f"Could not send OTP email: {exc}"},
+                    status=500,
+                )
 
-            return Response({
-                "message": "Account already exists but is not verified. OTP re-sent to email.",
-                "user_id": existing_user.id
-            }, status=200)
+            return _signup_response(
+                existing_user,
+                "Account already exists but is not verified. OTP re-sent to email.",
+                status.HTTP_200_OK,
+            )
 
         # ---------------------------------------------
         # 3️⃣ No user → Create new one
@@ -172,12 +189,20 @@ class UserSignupView(generics.CreateAPIView):
         user.is_active = False
         user.save()
 
-        send_otp(user, "email_verify")
+        try:
+            send_otp(user, "email_verify")
+        except Exception as exc:
+            user.delete()
+            return Response(
+                {"error": f"Could not send OTP email: {exc}"},
+                status=500,
+            )
 
-        return Response({
-            "message": "Signup successful. Verify your email using the OTP sent to you.",
-            "user_id": user.id
-        }, status=201)
+        return _signup_response(
+            user,
+            "Signup successful. Verify your email using the OTP sent to you.",
+            status.HTTP_201_CREATED,
+        )
 
 
 
@@ -230,6 +255,17 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         if not user.check_password(password):
             return Response({"error": "Incorrect password"}, status=400)
 
+        if not user.is_active:
+            return Response(
+                {
+                    "error": (
+                        "Your email is not verified yet. "
+                        "Complete OTP verification on the signup page before logging in."
+                    )
+                },
+                status=403,
+            )
+
         response = super().post(request, *args, **kwargs)
 
         if response.status_code == 200:
@@ -244,8 +280,21 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 access_age = 86400
                 refresh_age = 30 * 24 * 3600
 
-            response.set_cookie("access_token", access, httponly=True, secure=True, samesite="None", max_age=access_age)
-            response.set_cookie("refresh_token", refresh, httponly=True, secure=True, samesite="None", max_age=refresh_age)
+            cookie_opts = _auth_cookie_options()
+            response.set_cookie(
+                "access_token",
+                access,
+                httponly=True,
+                max_age=access_age,
+                **cookie_opts,
+            )
+            response.set_cookie(
+                "refresh_token",
+                refresh,
+                httponly=True,
+                max_age=refresh_age,
+                **cookie_opts,
+            )
 
             response.data = {
                 "message": "Login successful",
@@ -271,8 +320,15 @@ class CookieTokenRefreshView(APIView):
             refresh = RefreshToken(refresh_token)
             access = str(refresh.access_token)
 
-            response = Response({"message": "Token refreshed"})
-            response.set_cookie("access_token", access, httponly=True, secure=True, samesite="None", max_age=300)
+            response = Response({"message": "Token refreshed", "access": access})
+            cookie_opts = _auth_cookie_options()
+            response.set_cookie(
+                "access_token",
+                access,
+                httponly=True,
+                max_age=300,
+                **cookie_opts,
+            )
             return response
         except:
             return Response({"error": "Invalid refresh token"}, status=401)
@@ -329,8 +385,11 @@ def resend_email_otp(request):
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=404)
 
-    send_otp(user, "email_verify")
+    try:
+        send_otp(user, "email_verify")
+    except Exception as exc:
+        return Response({"error": f"Could not send OTP email: {exc}"}, status=500)
 
-    return Response({"message": "Email OTP resent successfully"})
+    return _signup_response(user, "Email OTP resent successfully", status.HTTP_200_OK)
 
 

@@ -6,6 +6,7 @@ import { FaSeedling, FaRupeeSign, FaLightbulb } from 'react-icons/fa';
 import Header from './Header';
 import stateDistrictData from './assets/data.json';
 import Settings from '../HomePage/Settings.jsx';
+import { BACKEND_BASE_URL } from '../../config/apiBase';
 
 function RecommendSubsidy() {
     const navigate = useNavigate();
@@ -162,7 +163,7 @@ function RecommendSubsidy() {
         console.log('Submitting form data:', formData);
 
         try {
-            const BASE_URL = `${import.meta.env.VITE_BASE_URL}`;
+            const BASE_URL = BACKEND_BASE_URL;
             
             // Prepare data in correct format
             const requestData = {

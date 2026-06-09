@@ -13,6 +13,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "../User_Profile/Header";
 import Settings from "../HomePage/Settings";
+import { BACKEND_BASE_URL } from "../../config/apiBase";
 import * as XLSX from "xlsx";
 
 const SAMPLE_APPLICATIONS = [
@@ -46,13 +47,11 @@ export default function Report() {
   const [errorMsg, setErrorMsg] = useState("");
   const [busyAppIds, setBusyAppIds] = useState([]);
 
-  const API_BASE = import.meta.env.VITE_BASE_URL || "";
-
   const SUBSIDIES_ENDPOINTS = [
-    API_BASE ? `${API_BASE}/api/subsidy_provider/subsidies/my/` : "/api/subsidy_provider/subsidies/my/",
-    API_BASE ? `${API_BASE}/api/subsidy_provider/subsidies/` : "/api/subsidy_provider/subsidies/",
-    API_BASE ? `${API_BASE}/api/subsidies/my_subsidies/` : "/api/subsidies/my_subsidies/",
-    API_BASE ? `${API_BASE}/subsidies/my_subsidies/` : "/subsidies/my_subsidies/",
+    `${BACKEND_BASE_URL}/api/subsidy_provider/subsidies/my/`,
+    `${BACKEND_BASE_URL}/api/subsidy_provider/subsidies/`,
+    `${BACKEND_BASE_URL}/api/subsidies/my_subsidies/`,
+    `${BACKEND_BASE_URL}/subsidies/my_subsidies/`,
   ];
 
   useEffect(() => {
@@ -73,7 +72,7 @@ export default function Report() {
       const refreshToken = readLocalToken(["refresh", "refresh_token", "refreshToken"]);
       if (refreshToken) {
         try {
-          const refreshUrl = API_BASE ? `${API_BASE}/api/token/refresh/` : "/api/token/refresh/";
+          const refreshUrl = BACKEND_BASE_URL ? `${BACKEND_BASE_URL}/api/token/refresh/` : "/api/token/refresh/";
           const r = await fetch(refreshUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -144,10 +143,10 @@ export default function Report() {
   // Build candidate application endpoint templates for a subsidy id
   function applicationsEndpointForId(id) {
     const list = [
-      API_BASE ? `${API_BASE}/api/subsidy_provider/subsidies/${id}/applications/` : `/api/subsidy_provider/subsidies/${id}/applications/`,
-      API_BASE ? `${API_BASE}/api/subsidies/${id}/applications/` : `/api/subsidies/${id}/applications/`,
-      API_BASE ? `${API_BASE}/subsidies/${id}/applications/` : `/subsidies/${id}/applications/`,
-      API_BASE ? `${API_BASE}/api/subsidy_provider/subsidies/${id}/applications` : `/api/subsidy_provider/subsidies/${id}/applications`,
+      BACKEND_BASE_URL ? `${BACKEND_BASE_URL}/api/subsidy_provider/subsidies/${id}/applications/` : `/api/subsidy_provider/subsidies/${id}/applications/`,
+      BACKEND_BASE_URL ? `${BACKEND_BASE_URL}/api/subsidies/${id}/applications/` : `/api/subsidies/${id}/applications/`,
+      BACKEND_BASE_URL ? `${BACKEND_BASE_URL}/subsidies/${id}/applications/` : `/subsidies/${id}/applications/`,
+      BACKEND_BASE_URL ? `${BACKEND_BASE_URL}/api/subsidy_provider/subsidies/${id}/applications` : `/api/subsidy_provider/subsidies/${id}/applications`,
     ];
     return list;
   }
@@ -178,10 +177,10 @@ export default function Report() {
     // fallback endpoints that might directly return applications
     if (!foundSubs) {
       const fallbackAppsEndpoints = [
-        API_BASE ? `${API_BASE}/api/subsidy_provider/subsidies/my/applications/` : "/api/subsidy_provider/subsidies/my/applications/",
-        API_BASE ? `${API_BASE}/api/subsidy/apply/` : "/api/subsidy/apply/",
-        API_BASE ? `${API_BASE}/subsidy/apply/` : "/subsidy/apply/",
-        API_BASE ? `${API_BASE}/api/subsidies/my_applications/` : "/api/subsidies/my_applications/",
+        BACKEND_BASE_URL ? `${BACKEND_BASE_URL}/api/subsidy_provider/subsidies/my/applications/` : "/api/subsidy_provider/subsidies/my/applications/",
+        BACKEND_BASE_URL ? `${BACKEND_BASE_URL}/api/subsidy/apply/` : "/api/subsidy/apply/",
+        BACKEND_BASE_URL ? `${BACKEND_BASE_URL}/subsidy/apply/` : "/subsidy/apply/",
+        BACKEND_BASE_URL ? `${BACKEND_BASE_URL}/api/subsidies/my_applications/` : "/api/subsidies/my_applications/",
       ];
       for (const u of fallbackAppsEndpoints) {
         try {
@@ -304,7 +303,7 @@ export default function Report() {
   }
 
   async function markPaymentDoneRequest(applicationId) {
-    const url = API_BASE ? `${API_BASE}/subsidy/applications/${applicationId}/mark_payment_done/` : `/api/applications/${applicationId}/mark_payment_done/`;
+    const url = BACKEND_BASE_URL ? `${BACKEND_BASE_URL}/subsidy/applications/${applicationId}/mark_payment_done/` : `/api/applications/${applicationId}/mark_payment_done/`;
     const access = readLocalToken();
     const headers = {
       "Content-Type": "application/json",

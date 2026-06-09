@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Settings from "../HomePage/Settings";
+import { BACKEND_BASE_URL } from "../../config/apiBase";
 
 export default function RateReview() {
   const { id } = useParams(); // Subsidy ID
@@ -11,8 +12,6 @@ export default function RateReview() {
   const [review, setReview] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
-  const API_BASE = import.meta.env.VITE_BASE_URL || "";
 
   async function submitRating(e) {
     e.preventDefault();
@@ -25,9 +24,7 @@ export default function RateReview() {
     }
 
     try {
-      const url = API_BASE
-        ? `${API_BASE}/subsidies/${id}/rate/`
-        : `/subsidies/${id}/rate/`;
+      const url = `${BACKEND_BASE_URL}/subsidies/${id}/rate/`;
 
       const res = await fetch(url, {
         method: "POST",

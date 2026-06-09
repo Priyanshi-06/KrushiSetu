@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import PasswordToggleIcon from "./PasswordToggleIcon";
 import api from "./api";
 import { Toaster, toast } from "react-hot-toast";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 function Signup({ onSignupSuccess = null }) {
-    const navigate = useNavigate();
-
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -62,11 +60,13 @@ function Signup({ onSignupSuccess = null }) {
                 confirm_password: confirmPassword,
             });
 
-            toast.success("Account created. Verify email OTP.");
+            toast.success(
+                res.data?.message || "OTP sent to your email. Please verify to activate your account."
+            );
             setOtpTimer(30);
             setStep(2);
         } catch (err) {
-            toast.error(err.response?.data?.error || "Signup failed");
+            toast.error(getApiErrorMessage(err, "Signup failed. Please try again."));
         }
 
         setIsLoading(false);
@@ -82,12 +82,10 @@ function Signup({ onSignupSuccess = null }) {
                 otp: emailOtp,
             });
 
-            toast.success("Signup complete! You can now login.");
-            if (onSignupSuccess) onSignupSuccess(); 
-            
+            toast.success("Email verified! You can now log in with your email and password.");
+            if (onSignupSuccess) onSignupSuccess();
         } catch (err) {
-            setStep(1);
-            toast.error(err.response?.data?.error || "Invalid OTP");
+            toast.error(getApiErrorMessage(err, "Invalid or expired OTP. Please try again."));
         }
 
         setIsLoading(false);
@@ -95,11 +93,11 @@ function Signup({ onSignupSuccess = null }) {
 
     const resendEmailOtp = async () => {
         try {
-            await api.post("/resend-email-otp/", { email_address: email });
-            toast.success("Email OTP resent.");
+            const res = await api.post("/resend-email-otp/", { email_address: email });
+            toast.success(res.data?.message || "OTP resent to your email.");
             setOtpTimer(30);
         } catch (err) {
-            toast.error("Failed to resend OTP.");
+            toast.error(getApiErrorMessage(err, "Failed to resend OTP. Please try again."));
         }
     };
 
@@ -122,12 +120,9 @@ function Signup({ onSignupSuccess = null }) {
                     Create Your Account
                 </p>
 
-                {/* STEP 1 — SIGNUP FORM */}
                 {step === 1 && (
                     <form onSubmit={handleSignupSubmit}>
                         <div className="p-2">
-
-                            {/* Full Name */}
                             <input
                                 className="w-full p-2 mb-3 rounded-md bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
                                 placeholder="Full Name"
@@ -143,12 +138,9 @@ function Signup({ onSignupSuccess = null }) {
                                 required
                             />
                             {fullNameError && (
-                                <p className="text-red-600 text-xs mb-1">
-                                    {fullNameError}
-                                </p>
+                                <p className="text-red-600 text-xs mb-1">{fullNameError}</p>
                             )}
 
-                            {/* Email */}
                             <input
                                 className="w-full p-2 mb-3 rounded-md bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
                                 type="email"
@@ -157,20 +149,15 @@ function Signup({ onSignupSuccess = null }) {
                                 onChange={(e) => {
                                     setEmail(e.target.value);
                                     setEmailError(
-                                        validateEmail(e.target.value)
-                                            ? ""
-                                            : "Invalid email"
+                                        validateEmail(e.target.value) ? "" : "Invalid email"
                                     );
                                 }}
                                 required
                             />
                             {emailError && (
-                                <p className="text-red-600 text-xs mb-1">
-                                    {emailError}
-                                </p>
+                                <p className="text-red-600 text-xs mb-1">{emailError}</p>
                             )}
 
-                            {/* Password */}
                             <div className="relative">
                                 <input
                                     className="w-full p-2 mb-3 rounded-md bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
@@ -182,7 +169,7 @@ function Signup({ onSignupSuccess = null }) {
                                         setPasswordError(
                                             passwordRestriction.test(e.target.value)
                                                 ? ""
-                                                : 'Password must be at least 8 characters, include 1 letter, 1 digit, and 1 special character.'
+                                                : "Password must be at least 8 characters, include 1 letter, 1 digit, and 1 special character."
                                         );
                                     }}
                                     required
@@ -193,7 +180,6 @@ function Signup({ onSignupSuccess = null }) {
                                 />
                             </div>
 
-                            {/* Confirm Password */}
                             <div className="relative">
                                 <input
                                     className="w-full p-2 mb-3 rounded-md bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600"
@@ -217,19 +203,15 @@ function Signup({ onSignupSuccess = null }) {
                             </div>
 
                             {passwordError && (
-                                <p className="text-red-600 text-xs mb-1">
-                                    {passwordError}
-                                </p>
+                                <p className="text-red-600 text-xs mb-1">{passwordError}</p>
                             )}
                         </div>
 
-                        {/* Terms */}
                         <div className="flex items-center space-x-2 pl-4 mb-2">
                             <input type="checkbox" required />
                             <label>I agree to the Terms & Conditions</label>
                         </div>
 
-                        {/* Submit */}
                         <div className="flex justify-center pb-3">
                             <button
                                 className="bg-green-700 text-white w-40 p-2 rounded"
@@ -242,7 +224,6 @@ function Signup({ onSignupSuccess = null }) {
                     </form>
                 )}
 
-                {/* STEP 2 — EMAIL OTP */}
                 {step === 2 && (
                     <form onSubmit={handleVerifyEmailOtp}>
                         <p className="text-center mb-2">Enter Email OTP</p>

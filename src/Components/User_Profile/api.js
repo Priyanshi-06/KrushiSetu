@@ -1,9 +1,8 @@
-// src/api.js
 import axios from "axios";
+import { BACKEND_BASE_URL } from "../../config/apiBase";
 
-const BASE_URL = `${import.meta.env.VITE_BASE_URL}/profile`;
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: `${BACKEND_BASE_URL}/profile`,
   withCredentials: true,
   xsrfCookieName: 'csrftoken',
   xsrfHeaderName: 'X-CSRFToken',

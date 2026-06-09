@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header.jsx";
 import Settings from "../HomePage/Settings.jsx";
+import { BACKEND_BASE_URL } from "../../config/apiBase";
 
 const Dashboard = () => {
   const [applications, setApplications] = useState([]);
@@ -59,16 +60,13 @@ const Dashboard = () => {
 
   async function fetchAppliedSubsidies() {
     try {
-      const BACKEND = `${import.meta.env.VITE_BASE_URL || ""}`;
-      const url = BACKEND ? `${BACKEND}/subsidy/apply/` : "/subsidy/apply/";
-
-      const res = await fetch(url, {
+      const res = await fetch(`${BACKEND_BASE_URL}/subsidy/apply/`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("access") || ""}`,
         },
-        credentials: BACKEND ? "include" : "same-origin",
+        credentials: "include",
       });
 
       const text = await res.text();

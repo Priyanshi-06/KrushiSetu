@@ -2,20 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Header from "../User_Profile/Header";
 import Settings from "../HomePage/Settings";
+import { BACKEND_BASE_URL } from "../../config/apiBase";
 
 export default function ViewDetails() {
   const { id } = useParams();
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE = import.meta.env.VITE_BASE_URL || "";
-
   useEffect(() => {
     async function fetchData() {
       try {
-        const url = API_BASE
-          ? `${API_BASE}/subsidy/applications/${id}/`
-          : `/subsidy/applications/${id}/`;
+        const url = `${BACKEND_BASE_URL}/subsidy/applications/${id}/`;
 
         const res = await fetch(url, {
           method: "GET",

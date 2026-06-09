@@ -5,6 +5,7 @@ import './Support.css';
 import Settings from '../HomePage/Settings.jsx';
 import FileDropzone from './FileDropzone';
 import  {toast, Toaster} from 'react-hot-toast';
+import { BACKEND_BASE_URL } from '../../config/apiBase';
 
 function Support() {
     const [grievances, setGrievances] = useState([]);
@@ -39,7 +40,7 @@ function Support() {
     const fetchGrievances = async () => {
         try {
             const token = localStorage.getItem('access');
-            const res = await fetch(`${import.meta.env.VITE_BASE_URL}/support/grievances/`, {
+            const res = await fetch(`${BACKEND_BASE_URL}/support/grievances/`, {
                 method: 'GET',
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
                 credentials: 'include',
@@ -106,7 +107,7 @@ function Support() {
         try {
             
             const token = localStorage.getItem('access');
-            const res = await fetch(`${import.meta.env.VITE_BASE_URL}/support/grievances/`, {
+            const res = await fetch(`${BACKEND_BASE_URL}/support/grievances/`, {
                 method: 'POST',
                 headers: token ? { Authorization: `Bearer ${token}` } : {},
                 body: data,

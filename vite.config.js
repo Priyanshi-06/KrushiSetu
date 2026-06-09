@@ -13,12 +13,17 @@ export default defineConfig({
     globals: true,
     setupFiles: "./tests/setup.js",
   },
-  // Dev server proxy: forward API calls to Django backend so cookies are same-origin
+  // Dev server proxy: same-origin requests → Django (fixes auth cookies locally)
   server: {
     proxy: {
-      // Proxy any requests starting with /photo or /api to the Django dev server
-      '/photo': 'http://localhost:8000',
-      '/api': 'http://localhost:8000',
+      '/api': 'http://127.0.0.1:8000',
+      '/photo': 'http://127.0.0.1:8000',
+      '/profile': 'http://127.0.0.1:8000',
+      '/support': 'http://127.0.0.1:8000',
+      '/subsidy': 'http://127.0.0.1:8000',
+      '/subsidies': 'http://127.0.0.1:8000',
+      '/news': 'http://127.0.0.1:8000',
+      '/notify': 'http://127.0.0.1:8000',
     },
   },
   build: {

@@ -27,7 +27,6 @@ const Grievance = () => {
       setLoading(true);
 
       const token = localStorage.getItem("access");
-      const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:8000";
 
       const response = await api.get("/support/grievances/my-assigned/", {
                     headers: { Authorization: `Bearer ${token}` },

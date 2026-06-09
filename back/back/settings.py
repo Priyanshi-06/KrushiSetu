@@ -284,9 +284,10 @@ LOGGING = {
 }
 
 
+USE_LOCAL_DB = os.getenv("USE_LOCAL_DB", "false").lower() == "true"
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if DATABASE_URL:
+if DATABASE_URL and not USE_LOCAL_DB:
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,
@@ -302,16 +303,34 @@ else:
         }
     }
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+SEND_REAL_EMAIL = os.getenv("SEND_REAL_EMAIL", "true").lower() == "true"
 
-# Email Provider
-EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
-
-ANYMAIL = {
-    "SENDINBLUE_API_KEY": os.getenv("BREVO_API_KEY"),  # Your Brevo API key
-}
-
-# Your verified custom domain email
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+if USE_LOCAL_DB or not DATABASE_URL:
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+    if SEND_REAL_EMAIL and EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+        EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+        EMAIL_HOST = "smtp.gmail.com"
+        EMAIL_PORT = 587
+        EMAIL_USE_TLS = True
+        EMAIL_USE_SSL = False
+        DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
+    elif SEND_REAL_EMAIL and os.getenv("BREVO_API_KEY"):
+        EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
+        ANYMAIL = {
+            "SENDINBLUE_API_KEY": os.getenv("BREVO_API_KEY"),
+        }
+        DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+    else:
+        EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+        DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@localhost")
+else:
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+    EMAIL_BACKEND = "anymail.backends.sendinblue.EmailBackend"
+    ANYMAIL = {
+        "SENDINBLUE_API_KEY": os.getenv("BREVO_API_KEY"),
+    }
+    DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
 
 

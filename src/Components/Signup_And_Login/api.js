@@ -1,9 +1,8 @@
 import axios from "axios";
-
-const BASE_URL = import.meta.env.VITE_BASE_URL || "http://127.0.0.1:8000";
+import { BACKEND_BASE_URL } from "../../config/apiBase";
 
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_BASE_URL}/api`,
+  baseURL: `${BACKEND_BASE_URL}/api`,
   withCredentials: true,
 });
 

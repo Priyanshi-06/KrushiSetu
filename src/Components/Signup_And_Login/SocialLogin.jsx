@@ -9,6 +9,7 @@ import {
     normalizeRole,
     getRedirectPathForRole
 } from "../../utils/auth";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 function SocialLogin() {
     const navigate = useNavigate();
@@ -44,7 +45,7 @@ function SocialLogin() {
 
         } catch (err) {
             console.error("Google login failed:", err.response?.data || err.message);
-            toast.error(err.response?.data?.error || "Google login failed");
+            toast.error(getApiErrorMessage(err, "Google login failed"));
         }
     };
 
