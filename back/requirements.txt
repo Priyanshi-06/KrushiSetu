@@ -16,7 +16,6 @@ django-otp==1.6.1
 django-phonenumber-field==8.3.0
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
-dotenv==0.9.9
 frozenlist==1.8.0
 google==3.0.0
 google-api-core==2.26.0

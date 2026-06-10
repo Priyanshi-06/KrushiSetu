@@ -21,8 +21,10 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load .env file from the back directory
-load_dotenv(dotenv_path=BASE_DIR / '.env')
+# Load .env file from the back directory (only needed locally; Render injects env vars directly)
+_env_path = BASE_DIR / '.env'
+if _env_path.exists():
+    load_dotenv(dotenv_path=_env_path)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -287,6 +289,15 @@ LOGGING = {
 USE_LOCAL_DB = os.getenv("USE_LOCAL_DB", "false").lower() == "true"
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+# Strip unsupported parameters that psycopg2 doesn't recognize (e.g. channel_binding)
+if DATABASE_URL:
+    from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
+    _parsed = urlparse(DATABASE_URL)
+    _params = parse_qs(_parsed.query, keep_blank_values=True)
+    _params.pop('channel_binding', None)  # remove unsupported param
+    _clean_query = urlencode({k: v[0] for k, v in _params.items()})
+    DATABASE_URL = urlunparse(_parsed._replace(query=_clean_query))
+
 if DATABASE_URL and not USE_LOCAL_DB:
     DATABASES = {
         "default": dj_database_url.parse(
@@ -295,6 +306,7 @@ if DATABASE_URL and not USE_LOCAL_DB:
             ssl_require=True,
         )
     }
+    print(f"[DB] Using NeonDB (PostgreSQL): {urlparse(DATABASE_URL).hostname}")
 else:
     DATABASES = {
         "default": {
@@ -302,6 +314,7 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+    print("[DB] WARNING: Using local SQLite database!")
 
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
