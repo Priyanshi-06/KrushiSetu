@@ -21,10 +21,16 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load .env file from the back directory (only needed locally; Render injects env vars directly)
-_env_path = BASE_DIR / '.env'
-if _env_path.exists():
-    load_dotenv(dotenv_path=_env_path)
+# Load .env file - check multiple locations:
+# 1. Local development: back/.env
+# 2. Render Secret File (if user uploaded .env as a secret file to /etc/secrets/.env)
+for _env_path in [
+    BASE_DIR / '.env',
+    Path('/etc/secrets/.env'),
+]:
+    if _env_path.exists():
+        load_dotenv(dotenv_path=_env_path, override=True)
+        print(f"[ENV] Loaded .env from: {_env_path}")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/

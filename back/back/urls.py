@@ -1,33 +1,37 @@
 """
 URL configuration for back project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
+from django.db import connection
+import os
+
+
+def db_check(request):
+    """Diagnostic endpoint - shows which database Django is connected to."""
+    db = connection.settings_dict
+    return JsonResponse({
+        "engine": db.get("ENGINE", ""),
+        "name": str(db.get("NAME", "")),
+        "host": db.get("HOST", "localhost (sqlite)"),
+        "database_url_set": bool(os.getenv("DATABASE_URL")),
+        "use_local_db": os.getenv("USE_LOCAL_DB", "not set"),
+        "is_neondb": "neon.tech" in str(db.get("HOST", "")),
+        "env_file_found": os.path.exists("/etc/secrets/.env"),
+    })
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('db-check/', db_check, name='db_check'),  # diagnostic - remove after confirmed working
     path('api/', include('loginSignup.urls')),
     path('api/', include('app.urls')),
     path('', include('app.urls')),
     path('profile/', include('dashboard.urls')),
     path('photo/', include('photo.urls')),
     path('support/', include('support.urls')),
-    path("api/subsidy_provider/",include('subsidy_provider.urls')),
-
-    # Subsidy Recommendation API
+    path("api/subsidy_provider/", include('subsidy_provider.urls')),
     path('api/subsidy-recommendations/', include('SubsidyRecommandation.urls')),
     path('subsidy/', include("subsidy.urls")),
     path('news/', include('news_post.urls')),
