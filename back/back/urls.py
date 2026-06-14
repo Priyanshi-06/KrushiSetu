@@ -16,7 +16,6 @@ def db_check(request):
         "name": str(db.get("NAME", "")),
         "host": db.get("HOST", "localhost (sqlite)"),
         "database_url_set": bool(os.getenv("DATABASE_URL")),
-        "use_local_db": os.getenv("USE_LOCAL_DB", "not set"),
         "is_neondb": "neon.tech" in str(db.get("HOST", "")),
         "env_file_found": os.path.exists("/etc/secrets/.env"),
     })
