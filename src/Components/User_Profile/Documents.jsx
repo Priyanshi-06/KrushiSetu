@@ -48,9 +48,12 @@ const Documents = () => {
             const res = await api.get(API_URL, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setDocuments(res.data);
+            // Handle both paginated and non-paginated responses
+            const data = Array.isArray(res.data) ? res.data : (res.data?.results || []);
+            setDocuments(data);
         } catch (error) {
             console.log('Failed to fetch documents. Please try again.');
+            setDocuments([]);
         }
 
     };

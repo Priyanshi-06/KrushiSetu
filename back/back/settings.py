@@ -304,29 +304,40 @@ DATABASE_URL_ENV_KEYS = (
 DATABASE_URL_ENV_NAME = next((key for key in DATABASE_URL_ENV_KEYS if os.getenv(key)), None)
 DATABASE_URL = os.getenv(DATABASE_URL_ENV_NAME) if DATABASE_URL_ENV_NAME else None
 
-if not DATABASE_URL:
-    raise ImproperlyConfigured(
-        "A Neon/PostgreSQL database URL is required. Set DATABASE_URL or POSTGRES_URL."
-    )
+# If DATABASE_URL is provided, use PostgreSQL with NeonDB
+if DATABASE_URL:
+    from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
 
-from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
+    _parsed = urlparse(DATABASE_URL)
+    if _parsed.scheme not in {"postgres", "postgresql"}:
+        raise ImproperlyConfigured("DATABASE_URL must be a PostgreSQL/Neon connection string.")
 
-_parsed = urlparse(DATABASE_URL)
-if _parsed.scheme not in {"postgres", "postgresql"}:
-    raise ImproperlyConfigured("DATABASE_URL must be a PostgreSQL/Neon connection string.")
+    _params = parse_qs(_parsed.query, keep_blank_values=True)
+    _params.pop("channel_binding", None)
+    _clean_query = urlencode({k: v[0] for k, v in _params.items()})
+    DATABASE_URL = urlunparse(_parsed._replace(query=_clean_query))
 
-_params = parse_qs(_parsed.query, keep_blank_values=True)
-_params.pop("channel_binding", None)
-_clean_query = urlencode({k: v[0] for k, v in _params.items()})
-DATABASE_URL = urlunparse(_parsed._replace(query=_clean_query))
-
-DATABASES = {
-    "default": dj_database_url.parse(
-        DATABASE_URL,
-        conn_max_age=600,
-        ssl_require=True,
-    )
-}
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+    print("[DATABASE] 🐘 Using PostgreSQL/NeonDB")
+else:
+    # Fallback to SQLite for local development only
+    if not DEBUG:
+        raise ImproperlyConfigured(
+            "DATABASE_URL is required in production. Set DATABASE_URL environment variable with your NeonDB connection string."
+        )
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+    print("[DATABASE] 📁 Using SQLite (local development only)")
 
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")

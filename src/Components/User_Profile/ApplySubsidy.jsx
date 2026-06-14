@@ -245,7 +245,8 @@ export default function ApplySubsidy() {
   const fetchDocuments = async () => {
     try {
       const resp = await api.get(DOCUMENTS_URL, { withCredentials: true });
-      let docs = resp.data || [];
+      // Handle both paginated and non-paginated responses
+      let docs = Array.isArray(resp.data) ? resp.data : (resp.data?.results || []);
       if (Array.isArray(subsidyRequiredValues) && subsidyRequiredValues.length > 0) {
         docs = docs.filter(d => subsidyRequiredValues.includes(d.document_type));
       }
