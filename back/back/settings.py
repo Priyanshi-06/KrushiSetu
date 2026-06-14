@@ -295,11 +295,18 @@ LOGGING = {
 }
 
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL_ENV_KEYS = (
+    "DATABASE_URL",
+    "POSTGRES_URL",
+    "POSTGRES_PRISMA_URL",
+    "POSTGRES_URL_NON_POOLING",
+)
+DATABASE_URL_ENV_NAME = next((key for key in DATABASE_URL_ENV_KEYS if os.getenv(key)), None)
+DATABASE_URL = os.getenv(DATABASE_URL_ENV_NAME) if DATABASE_URL_ENV_NAME else None
 
 if not DATABASE_URL:
     raise ImproperlyConfigured(
-        "DATABASE_URL is required. Set it to your Neon PostgreSQL connection string."
+        "A Neon/PostgreSQL database URL is required. Set DATABASE_URL or POSTGRES_URL."
     )
 
 from urllib.parse import urlparse, urlencode, parse_qs, urlunparse

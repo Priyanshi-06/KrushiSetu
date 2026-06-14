@@ -17,7 +17,15 @@ def db_check(request):
         "engine": db.get("ENGINE", ""),
         "name": str(db.get("NAME", "")),
         "host": db.get("HOST", "localhost (sqlite)"),
-        "database_url_set": bool(os.getenv("DATABASE_URL")),
+        "database_url_source": next((
+            key for key in (
+                "DATABASE_URL",
+                "POSTGRES_URL",
+                "POSTGRES_PRISMA_URL",
+                "POSTGRES_URL_NON_POOLING",
+            )
+            if os.getenv(key)
+        ), None),
         "is_neondb": "neon.tech" in str(db.get("HOST", "")),
         "env_files_found": {
             "project_root": (backend_root.parent / ".env").exists(),
