@@ -64,7 +64,7 @@ export default function ApplySubsidy() {
   const DOC_TYPES = [
     { value: 'aadhar_card', label: 'Aadhaar' },
     { value: 'bank_passbook', label: 'Bank Passbook / Cancelled Cheque' },
-    { value: 'land_records', label: 'Land documents/tenancy proof' },
+    { value: 'land_document', label: 'Land documents/tenancy proof' },
     { value: 'pan_card', label: 'PAN Card' },
     { value: 'photo', label: 'Profile Photo' },
     { value: 'shg_membership', label: 'SHG membership' },

@@ -24,10 +24,10 @@ const DOC_TYPES = [
   { value: 'annexure_copy', label: 'Copy of Annexure in Group Certification' },
   { value: 'residue_testing_receipt', label: 'Receipt of fee paid for residue testing' },
   { value: 'divyang_certificate', label: 'Copy of Divyang Certificate (if applicable)' },
-  { value: 'joint_account_construction', label: "Joint Account Holder's Construction Letter" },
+  { value: 'joint_account_letter', label: "Joint Account Holder's Construction Letter" },
   { value: 'residue_testing_copy', label: 'Copy of residue testing' },
   { value: 'aadhar_card', label: 'Aadhar Card' },
-  { value: 'land_records', label: 'Copy of 7/12 and 8-A' }
+  { value: 'land_document', label: 'Copy of 7/12 and 8-A' }
 ];
 
 const Dashboard = () => {
