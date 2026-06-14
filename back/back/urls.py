@@ -6,18 +6,24 @@ from django.urls import path, include
 from django.http import JsonResponse
 from django.db import connection
 import os
+from pathlib import Path
 
 
 def db_check(request):
     """Diagnostic endpoint - shows which database Django is connected to."""
     db = connection.settings_dict
+    backend_root = Path(__file__).resolve().parent.parent
     return JsonResponse({
         "engine": db.get("ENGINE", ""),
         "name": str(db.get("NAME", "")),
         "host": db.get("HOST", "localhost (sqlite)"),
         "database_url_set": bool(os.getenv("DATABASE_URL")),
         "is_neondb": "neon.tech" in str(db.get("HOST", "")),
-        "env_file_found": os.path.exists("/etc/secrets/.env"),
+        "env_files_found": {
+            "project_root": (backend_root.parent / ".env").exists(),
+            "backend_root": (backend_root / ".env").exists(),
+            "render_secret": os.path.exists("/etc/secrets/.env"),
+        },
     })
 
 
