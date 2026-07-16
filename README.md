@@ -118,9 +118,6 @@ EMAIL_HOST_USER=your-email@example.com
 EMAIL_HOST_PASSWORD=your-email-app-password
 BREVO_API_KEY=your-brevo-api-key
 GOOGLE_CLIENT_ID=your-google-client-id
-TWILIO_ACCOUNT_SID=your-twilio-account-sid
-TWILIO_AUTH_TOKEN=your-twilio-auth-token
-TWILIO_PHONE_NUMBER=your-twilio-phone-number
 ```
 
 Do not commit real `.env` secrets.
